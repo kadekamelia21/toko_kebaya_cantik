@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detail Produk</title>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(245,197,66,0.3);
+      z-index: 1;
+      position: relative;
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+    img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: contain;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+    h2 {
+      color: #f5c542;
+      margin: 15px 0 5px;
+    }
+    p {
+      margin-bottom: 15px;
+    }
+    .back-link {
+      color: #f5c542;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .button {
+      padding: 10px 20px;
+      background-color: #25d366;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 16px;
+    }
+    .button:hover {
+      background-color: #1ebe5d;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="particles"></canvas>
+  <div class="container" id="detailProduk">
+    <!-- Konten produk akan dimuat oleh JavaScript -->
+  </div>
+
+  <script>
+    const produkList = [
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "1.jpeg", deskripsi: "Kebaya Janggan adalah busana tradisional elegan khas Indonesia dengan motif yang anggun dan bahan yang nyaman. Cocok digunakan untuk acara formal dan tradisional." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "2.jpeg", deskripsi: "Kebaya Janggan ini memiliki desain modern namun tetap mempertahankan nilai budaya. Terbuat dari bahan berkualitas tinggi yang halus di kulit." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "3.jpeg", deskripsi: "Dirancang dengan detail halus dan payet yang memperindah tampilan. Sangat cocok untuk perayaan atau sesi foto budaya." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "4.jpeg", deskripsi: "Kebaya ini menghadirkan warna-warna lembut yang cocok untuk semua warna kulit, menampilkan sisi elegan dan feminim Anda." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "5.jpeg", deskripsi: "Kebaya klasik ini memberikan kenyamanan saat dipakai seharian, dengan desain simple namun memikat." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "6.jpeg", deskripsi: "Desain floral berpadu dengan kain halus menjadikan kebaya ini pilihan tepat untuk hari spesial Anda." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "7.jpeg", deskripsi: "Dikenal dengan jahitan rapi dan bahan yang jatuh, kebaya ini memberikan kesan anggun dan mewah." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "8.jpeg", deskripsi: "Kebaya ini cocok untuk remaja hingga dewasa, dengan ukuran yang fleksibel dan motif kekinian." },
+      { nama: "Kebaya Janggan", harga: "Rp 75.000", gambar: "9.jpeg", deskripsi: "Tampilan tradisional dengan sentuhan modern membuat kebaya ini menjadi favorit banyak wanita." },
+      { nama: "Kebaya Broklat Payet", harga: "Rp 150.000", gambar: "10.jpeg", deskripsi: "Kebaya Broklat Payet ini memiliki payet elegan yang memancarkan kemewahan di setiap langkah Anda." },
+    ];
+
+    const params = new URLSearchParams(window.location.search);
+    const id = parseInt(params.get("id")) - 1;
+
+    const produk = produkList[id];
+
+    const container = document.getElementById("detailProduk");
+
+    if (produk) {
+      container.innerHTML = `
+        <a href="index.html" class="back-link">← Kembali ke Daftar Produk</a>
+        <img src="${produk.gambar}" alt="${produk.nama}">
+        <h2>${produk.nama}</h2>
+        <p><strong>Harga:</strong> ${produk.harga}</p>
+        <p>${produk.deskripsi}</p>
+        <button class="button" onclick="addToCart(${id})">Masukkan ke Keranjang</button>
+      `;
+    } else {
+      container.innerHTML = "<p>Produk tidak ditemukan.</p>";
+    }
+
+    function addToCart(id) {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const produk = produkList[id];
+      cart.push(produk);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      alert("Produk telah ditambahkan ke keranjang!");
+    }
+
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.radius = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 0.6 - 0.3;
+        this.speedY = Math.random() * 0.6 - 0.3;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+          this.reset();
+        }
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#f5c542";
+        ctx.fill();
+      }
+    }
+
+    function initParticles(count) {
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle());
+      }
+    }
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of particles) {
+        p.update();
+        p.draw();
+      }
+      requestAnimationFrame(animateParticles);
+    }
+
+    initParticles(100);
+    animateParticles();
+  </script>
+</body>
+</html>

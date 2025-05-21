@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f0f0f, #1c1c1c);
+      color: white;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: #1e1e1e;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 0 40px rgba(245,197,66,0.3);
+    }
+    h1 {
+      color: #f5c542;
+      margin-bottom: 25px;
+      text-align: center;
+      font-size: 2.5em;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 14px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+    }
+    th {
+      background-color: #292929;
+      color: #f5c542;
+      font-size: 1.1em;
+    }
+    td input {
+      width: 60px;
+      padding: 5px;
+      font-size: 1em;
+      text-align: center;
+    }
+    .total {
+      text-align: right;
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .buttons {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 14px 28px;
+      margin: 8px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-clear {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .btn-clear:hover {
+      background-color: #c0392b;
+    }
+    .btn-bayar {
+      background-color: #25d366;
+      color: white;
+    }
+    .btn-bayar:hover {
+      background-color: #1ebe5d;
+    }
+    a {
+      color: #f5c542;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 25px;
+    }
+    .form-pengiriman {
+      margin-top: 40px;
+      background: #2a2a2a;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .form-pengiriman h2 {
+      margin-bottom: 15px;
+      color: #f5c542;
+    }
+    .form-pengiriman label {
+      display: block;
+      margin-bottom: 8px;
+      margin-top: 15px;
+    }
+    .form-pengiriman input, .form-pengiriman textarea {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Checkout</h1>
+    <a href="index.html">← Kembali ke Toko</a>
+
+    <table id="cart-table">
+      <thead>
+        <tr>
+          <th>Produk</th>
+          <th>Harga</th>
+          <th>Qty</th>
+          <th>Subtotal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="total" id="total">Total: Rp 0</div>
+
+    <div class="form-pengiriman">
+      <h2>Informasi Pengiriman</h2>
+      <label for="nama">Nama Lengkap</label>
+      <input type="text" id="nama" placeholder="Masukkan nama Anda">
+
+      <label for="alamat">Alamat Lengkap</label>
+      <textarea id="alamat" rows="3" placeholder="Masukkan alamat pengiriman"></textarea>
+
+      <label for="telepon">Nomor Telepon</label>
+      <input type="text" id="telepon" placeholder="Contoh: 081234567890">
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-clear" onclick="hapusSemua()">Hapus Semua</button>
+      <button class="btn btn-bayar" onclick="bayarWhatsapp()">Bayar Sekarang</button>
+    </div>
+  </div>
+
+  <script>
+    function loadCart() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const tbody = document.querySelector("#cart-table tbody");
+      tbody.innerHTML = "";
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.qty;
+        total += subtotal;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>Rp ${item.price.toLocaleString()}</td>
+          <td><input type="number" min="1" value="${item.qty}" onchange="ubahQty(${index}, this.value)"></td>
+          <td>Rp ${subtotal.toLocaleString()}</td>
+          <td><button class="btn btn-clear" onclick="hapusItem(${index})">Hapus</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById("total").textContent = "Total: Rp " + total.toLocaleString();
+    }
+
+    function ubahQty(index, qtyBaru) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart[index].qty = parseInt(qtyBaru);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    function hapusItem(index) {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    function hapusSemua() {
+      if (confirm("Yakin ingin menghapus semua item di keranjang?")) {
+        localStorage.removeItem("cart");
+        loadCart();
+      }
+    }
+
+    function bayarWhatsapp() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (cart.length === 0) {
+        alert("Keranjang kosong.");
+        return;
+      }
+
+      const nama = document.getElementById("nama").value.trim();
+      const alamat = document.getElementById("alamat").value.trim();
+      const telepon = document.getElementById("telepon").value.trim();
+
+      if (!nama || !alamat || !telepon) {
+        alert("Mohon lengkapi informasi pengiriman.");
+        return;
+      }
+
+      let pesan = `Halo, saya ingin memesan:%0A`;
+      let total = 0;
+      cart.forEach(item => {
+        pesan += `- ${item.name} (${item.qty}x) = Rp ${(item.qty * item.price).toLocaleString()}%0A`;
+        total += item.qty * item.price;
+      });
+      pesan += `%0ATotal: Rp ${total.toLocaleString()}`;
+      pesan += `%0A%0ANama: ${nama}%0AAlamat: ${alamat}%0ANo. HP: ${telepon}`;
+
+      const noWa = "6282228002837";
+      const url = `https://wa.me/${noWa}?text=${pesan}`;
+      window.open(url, "_blank");
+    }
+
+    loadCart();
+  </script>
+</body>
+</html>
